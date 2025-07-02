@@ -41,6 +41,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@tauri-apps/api": "^2.6.0"
+		"@tauri-apps/api": "^2.6.0",
+		"fast-average-color": "^9.5.0"
 	}
 }
