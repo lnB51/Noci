@@ -1,6 +1,9 @@
 use std::process::Command;
 
+/// Fetches the current status of Spotify, returning a `SpotifyStatus` if successful.
+/// Utilizes AppleScript to interact with the Spotify application.
 pub fn get_spotify_status() -> Option<crate::params::SpotifyStatus> {
+    // Define AppleScript to extract Spotify track information
     let script = r#"
         on escape_json(s)
             set s to my replace_text(s, "\\", "\\\\")
@@ -42,17 +45,22 @@ pub fn get_spotify_status() -> Option<crate::params::SpotifyStatus> {
         end tell
     "#;
 
+    // Execute the AppleScript using osascript command
     let output = Command::new("osascript")
         .arg("-e")
         .arg(script)
         .output()
         .ok()?;
+    
+    // Convert the script output to a JSON string and parse it
     let json_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
     serde_json::from_str(&json_str).ok()
 }
 
+/// Sets the track position in Spotify to the specified value.
 #[tauri::command]
 pub fn set_track_position(position: f64) -> Result<(), String> {
+    // Define AppleScript to set the track position
     let script = format!(
         r#"
         tell application "Spotify"
@@ -64,12 +72,14 @@ pub fn set_track_position(position: f64) -> Result<(), String> {
         position
     );
 
+    // Execute the AppleScript using osascript command
     let output = Command::new("osascript")
         .arg("-e")
         .arg(script)
         .output()
         .map_err(|e| format!("Failed to run AppleScript: {}", e))?;
 
+    // Check for errors in the AppleScript execution
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!("AppleScript error: {}", stderr));
@@ -78,8 +88,10 @@ pub fn set_track_position(position: f64) -> Result<(), String> {
     Ok(())
 }
 
+/// Toggles playback state in Spotify (play/pause).
 #[tauri::command]
 pub fn toggle_playback() -> Result<(), String> {
+    // Define AppleScript to toggle playback
     let script = r#"
         tell application "Spotify"
             if it is running then
@@ -92,12 +104,14 @@ pub fn toggle_playback() -> Result<(), String> {
         end tell
     "#;
 
+    // Execute the AppleScript using osascript command
     let output = Command::new("osascript")
         .arg("-e")
         .arg(script)
         .output()
         .map_err(|e| format!("Failed to run AppleScript: {}", e))?;
 
+    // Check for errors in the AppleScript execution
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!("AppleScript error: {}", stderr));
@@ -106,8 +120,10 @@ pub fn toggle_playback() -> Result<(), String> {
     Ok(())
 }
 
+/// Skips to the next track in Spotify.
 #[tauri::command]
 pub fn next_track() -> Result<(), String> {
+    // Define AppleScript to skip to the next track
     let script = r#"
         tell application "Spotify"
             if it is running then
@@ -116,12 +132,14 @@ pub fn next_track() -> Result<(), String> {
         end tell
     "#;
 
+    // Execute the AppleScript using osascript command
     let output = Command::new("osascript")
         .arg("-e")
         .arg(script)
         .output()
         .map_err(|e| format!("Failed to run AppleScript: {}", e))?;
 
+    // Check for errors in the AppleScript execution
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!("AppleScript error: {}", stderr));
@@ -130,8 +148,10 @@ pub fn next_track() -> Result<(), String> {
     Ok(())
 }
 
+/// Returns to the previous track in Spotify.
 #[tauri::command]
 pub fn previous_track() -> Result<(), String> {
+    // Define AppleScript to return to the previous track
     let script = r#"
         tell application "Spotify"
             if it is running then
@@ -140,12 +160,14 @@ pub fn previous_track() -> Result<(), String> {
         end tell
     "#;
 
+    // Execute the AppleScript using osascript command
     let output = Command::new("osascript")
         .arg("-e")
         .arg(script)
         .output()
         .map_err(|e| format!("Failed to run AppleScript: {}", e))?;
 
+    // Check for errors in the AppleScript execution
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!("AppleScript error: {}", stderr));

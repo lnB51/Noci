@@ -5,6 +5,7 @@ use objc::declare::ClassDecl;
 use objc::runtime::{Class, Object, Sel};
 use objc::{class, msg_send, sel, sel_impl};
 
+/// Exits the app.
 #[tauri::command]
 pub fn exit_app() -> Result<(), String> {
     std::process::exit(0);
@@ -19,6 +20,14 @@ impl std::ops::BitOr for crate::params::NSTrackingAreaOptions {
 
 static mut TRACK_VIEW_CLASS_REGISTERED: bool = false;
 
+/// Registers the `TrackView` class.
+///
+/// This function registers a new class called `TrackView` that inherits from `NSView`.
+/// It adds three methods to the class: `mouseEntered:`, `mouseExited:`, and
+/// `updateTrackingAreas`.
+///
+/// This function is only called once, even if `register_track_view_class` is called
+/// multiple times.
 unsafe fn register_track_view_class() -> *const Class {
     if TRACK_VIEW_CLASS_REGISTERED {
         return Class::get("TrackView").unwrap();
@@ -44,6 +53,9 @@ unsafe fn register_track_view_class() -> *const Class {
     decl.register()
 }
 
+/// Gets the window and screen associated with the given object.
+///
+/// If the object is not associated with a window or screen, this function returns `None`.
 unsafe fn get_window_and_screen(this: &Object) -> Option<(id, id)> {
     let window: id = msg_send![this, window];
     if window == nil {
@@ -56,6 +68,20 @@ unsafe fn get_window_and_screen(this: &Object) -> Option<(id, id)> {
     Some((window, screen))
 }
 
+/// Calculates the initial frame of the window.
+///
+/// The initial frame is centered on the screen and has a width and height that is
+/// proportional to the screen's size.
+///
+/// The width is calculated as the screen's width multiplied by
+/// `crate::params::INIT_WINDOW_WIDTH_RATIO`.
+///
+/// The height is calculated as `crate::params::INIT_WINDOW_HEIGHT`.
+///
+/// The x-coordinate is calculated as the screen's width minus the window's width,
+/// divided by 2.
+///
+/// The y-coordinate is calculated as the screen's height minus the window's height.
 unsafe fn calculate_initial_frame(screen: id) -> NSRect {
     let frame: NSRect = msg_send![screen, frame];
     let backing_scale_factor: f64 = msg_send![screen, backingScaleFactor];
@@ -71,6 +97,15 @@ unsafe fn calculate_initial_frame(screen: id) -> NSRect {
     )
 }
 
+/// Calculates the resized frame of the window.
+///
+/// The resized frame is centered on the screen and has a width and height of
+/// `crate::params::RESIZED_WINDOW_WIDTH` and `crate::params::RESIZED_WINDOW_HEIGHT`.
+///
+/// The x-coordinate is calculated as the screen's width minus the window's width,
+/// divided by 2.
+///
+/// The y-coordinate is calculated as the screen's height minus the window's height.
 unsafe fn calculate_resized_frame(screen: id) -> NSRect {
     let frame: NSRect = msg_send![screen, frame];
     let width = crate::params::RESIZED_WINDOW_WIDTH;
@@ -80,6 +115,10 @@ unsafe fn calculate_resized_frame(screen: id) -> NSRect {
     NSRect::new(NSPoint::new(x, y), NSSize::new(width, height))
 }
 
+/// Called when the mouse enters the `TrackView` object.
+///
+/// This function resizes the window to the resized frame and makes the window
+/// visible.
 extern "C" fn mouse_exited(this: &Object, _: Sel, _event: id) {
     unsafe {
         if let Some((window, screen)) = get_window_and_screen(this) {
@@ -89,6 +128,10 @@ extern "C" fn mouse_exited(this: &Object, _: Sel, _event: id) {
     }
 }
 
+/// Called when the mouse exits the `TrackView` object.
+///
+/// This function resizes the window to the initial frame and makes the window
+/// visible.
 extern "C" fn mouse_entered(this: &Object, _: Sel, _event: id) {
     unsafe {
         if let Some((window, screen)) = get_window_and_screen(this) {
@@ -99,6 +142,10 @@ extern "C" fn mouse_entered(this: &Object, _: Sel, _event: id) {
     }
 }
 
+/// Called when the `TrackView` object needs to update its tracking areas.
+///
+/// This function removes all existing tracking areas and adds a new tracking area
+/// with the `NSTrackingMouseEnteredAndExited` and `NSTrackingActiveAlways` options.
 extern "C" fn update_tracking_areas(this: &Object, _: Sel) {
     unsafe {
         let existing_areas: id = msg_send![this, trackingAreas];
@@ -125,6 +172,12 @@ extern "C" fn update_tracking_areas(this: &Object, _: Sel) {
     }
 }
 
+/// Creates a native notch window.
+///
+/// This function creates a new window with a transparent background and a
+/// `TrackView` object as its content view.
+///
+/// The window is made key and ordered front.
 pub fn create_native_notch_window(window: &tauri::WebviewWindow) {
     unsafe {
         let ns_window_ptr = window.ns_window().expect("Failed to get ns_window");
