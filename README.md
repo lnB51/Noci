@@ -37,8 +37,8 @@ Noci is a desktop music controller app built with [SvelteKit](https://kit.svelte
 ### Installation
 
 ```sh
-git clone https://github.com/lnb51/noci.git
-cd noci
+git clone https://github.com/lnB51/Noci.git
+cd Noci
 ```
 
 ---
@@ -102,11 +102,11 @@ build/       # Production build output
 
 ### Default view
 
-![default](https://github.com/lnb51/noci/showcase/default_view.png)
+![default](https://github.com/lnB51/Noci/showcase/default_view.png)
 
 ### Wide 
 
-![wide](https://github.com/lnb51/noci/showcase/wide_view.png)
+![wide](https://github.com/lnB51/Noci/showcase/wide_view.png)
 
 
 ---
