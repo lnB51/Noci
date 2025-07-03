@@ -4,6 +4,12 @@
 	import { writable } from 'svelte/store';
 	import { listen } from '@tauri-apps/api/event';
 	import { invoke } from '@tauri-apps/api/core';
+	import close from '$lib/assets/close.svg';
+	import nociIcon from '$lib/assets/noci_icon.svg';
+	import play from '$lib/assets/play.svg';
+	import prev from '$lib/assets/prev.svg';
+	import next from '$lib/assets/next.svg';
+	import pause from '$lib/assets/pause.svg';
 
 	let music_info = null;
 	let lastTrackInfo = null;
@@ -27,13 +33,13 @@
 
 	// Playback controls config
 	const controls = [
-		{ icon: 'skip_previous', label: 'Previous track', handler: previousTrack },
+		{ icon: prev, label: 'Previous track', handler: previousTrack },
 		{
-			icon: () => (isPlaying ? 'pause' : 'play_arrow'),
+			icon: () => (isPlaying ? pause : play),
 			label: () => (isPlaying ? 'Pause' : 'Play'),
 			handler: playPause
 		},
-		{ icon: 'skip_next', label: 'Next track', handler: nextTrack }
+		{ icon: next, label: 'Next track', handler: nextTrack }
 	];
 
 	// Seek/drag behavior
@@ -133,15 +139,29 @@
 	});
 </script>
 
-
 <svelte:head>
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
 </svelte:head>
 
 {#if displayTrack}
 	{#if $windowWidth > 450}
+		<div class="flex h-[10vh] items-center justify-between bg-black px-4 py-5 text-white">
+			<div class="flex items-center gap-2">
+				<img src={nociIcon} alt="Noci logo" class="h-6 w-6" />
+				<span class="font-semibold">Noci</span>
+			</div>
+			<button
+				class="exit-button flex cursor-pointer items-center justify-center rounded p-1 transition hover:bg-red-600"
+				aria-label="Exit app"
+				on:click={() => {
+					invoke('exit_app').catch(console.error);
+				}}
+			>
+				<img src={close} alt="Close" class="h-6 w-6" />
+			</button>
+		</div>
 		<div
-			class="mx-auto flex h-screen max-w-3xl items-center justify-center gap-4 rounded-b-lg bg-black px-4 py-4 text-white"
+			class="mx-auto flex h-[85vh] max-w-3xl items-center justify-center gap-4 rounded-b-lg bg-black px-4 py-4 text-white"
 			style="--bar-color: {barColor}"
 		>
 			<img
@@ -187,9 +207,11 @@
 							on:click={control.handler}
 							aria-label={typeof control.label === 'function' ? control.label() : control.label}
 						>
-							<span class="material-symbols-rounded">
-								{typeof control.icon === 'function' ? control.icon() : control.icon}
-							</span>
+							<img
+								src={typeof control.icon === 'function' ? control.icon() : control.icon}
+								alt=""
+								class="h-6 w-6"
+							/>
 						</button>
 					{/each}
 				</div>

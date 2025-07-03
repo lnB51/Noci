@@ -5,6 +5,9 @@
   "windows": [
     "main"
   ],
+  "remote": {
+    "urls": ["http://*", "https://*"]
+  },
   "permissions": [
     "core:default",
     "core:window:allow-set-size",

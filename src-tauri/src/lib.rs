@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 use std::{process::Command, thread, time::Duration};
 use tauri::{Emitter, WebviewUrl, WebviewWindowBuilder};
 
+pub mod params;
+
 const INIT_WINDOW_WIDTH_RATIO: f64 = 0.17;
 const INIT_WINDOW_HEIGHT: f64 = 32.0;
 const NOTCH_WINDOW_LEVEL: i64 = 40;
@@ -195,6 +197,11 @@ fn previous_track() -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn exit_app() -> Result<(), String> {
+    std::process::exit(0);
+}
+
 impl std::ops::BitOr for NSTrackingAreaOptions {
     type Output = u64;
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -354,11 +361,11 @@ fn create_native_notch_window(window: &tauri::WebviewWindow) {
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            if cfg!(debug_assertions) {
+            {
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
                 let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
-                    .title("Transparent Titlebar Window")
+                    .title("Noci")
                     .resizable(false)
                     .fullscreen(false)
                     .visible(false)
@@ -406,7 +413,8 @@ pub fn run() {
             set_track_position,
             toggle_playback,
             next_track,
-            previous_track
+            previous_track,
+            exit_app
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
